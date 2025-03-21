@@ -521,7 +521,6 @@ for state_fips in tqdm(state_fips_list):
         #     No_Multihazard_County_df = pd.concat([No_Multihazard_County_df, pd.DataFrame({'STATE_FIPS': [state_fips], 'COUNTY_FIPS': [county_fips]})])
         #     print(f'\n NO MULTI-HAZARD PAIRS FOR STATE:{state_fips} AND COUNTY: {county_fips} \n')
 
-    # all_combined_pair_df.to_csv(fr'C:\Users\Administrator\OneDrive\OneDrive - University of Southampton\Data\Hazards_Disasters\NCEI_Storm_Database_Multihazards_1996_2024_lag_{time_lag_int}_state_{state_fips}.csv.gz', compression='gzip', encoding='utf-8', index=True)
 
 print(f"Pair ID Count: {pair_id_count}")
 display(dfmulti)
