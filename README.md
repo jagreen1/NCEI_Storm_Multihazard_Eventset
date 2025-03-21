@@ -2,6 +2,7 @@
 This repository contains scripts that allows the user to clean NOAA NCEI's Storm Events Database, and generate a custom multihazard eventset.
 
 The input database files necessary to run these scripts can be downloaded via HTML/FTP on the NCEI website at the below URL (as of Mar 2025).
+- https://www.ncdc.noaa.gov/stormevents/ftp.jsp
 - https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/
 - ftp://ftp.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/
 
