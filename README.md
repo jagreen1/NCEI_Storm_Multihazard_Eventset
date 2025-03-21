@@ -1,5 +1,5 @@
 # NCEI_Storm_Multihazard_Eventset
-This repository contains scripts that allows the user to clean NOAA NCEI's Storm Events Database, and generate a custom multihazard eventset.
+This repository contains scripts that allows the user to clean NOAA NCEI's Storm Events Database, and generate a custom multihazard eventset using a defined timelag overlap and event type / impact threshold filters.
 
 The input database files necessary to run these scripts can be downloaded via HTML/FTP on the NCEI website at the below URL (as of Mar 2025).
 - https://www.ncdc.noaa.gov/stormevents/ftp.jsp
