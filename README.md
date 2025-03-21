@@ -1,6 +1,9 @@
 # NCEI_Storm_Multihazard_Eventset
 This repository contains scripts that allows the user to clean NOAA NCEI's Storm Events Database, and generate a custom multihazard eventset.
 
+The input database files necessary to run these scripts can be downloaded via HTML/FTP on the NCEI website at the below URL (as of Mar 2025).
+https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/
+
 To the best of my knowledge, this is the first publically avaliable Multihazard Eventset specific to the United States.
 
 The formatting has been designed in a manner similar to the MYRIAD-HESA multihazard eventset developed by Judith Claassen.
