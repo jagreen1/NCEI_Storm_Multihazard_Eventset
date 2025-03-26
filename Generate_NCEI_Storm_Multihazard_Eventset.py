@@ -59,6 +59,28 @@ dfsingle = dfsingle[~dfsingle["END_DATETIME"].isnull()]
 
 dfsingle["DAMAGE_CROPS"] = dfsingle["DAMAGE_CROPS"].fillna(0).astype(int)
 dfsingle["DAMAGE_PROPERTY"] = dfsingle["DAMAGE_PROPERTY"].fillna(0).astype(int)
+
+
+dfsingle['DEATHS_DIRECT'] = dfsingle['DEATHS_DIRECT'].fillna(0).astype(int)
+dfsingle['DEATHS_INDIRECT'] = dfsingle['DEATHS_INDIRECT'].fillna(0).astype(int)
+dfsingle['INJURIES_DIRECT'] = dfsingle['INJURIES_DIRECT'].fillna(0).astype(int)
+dfsingle['INJURIES_DIRECT'] = dfsingle['INJURIES_DIRECT'].fillna(0).astype(int)
+dfsingle['DAMAGE_CROPS'] = dfsingle['DAMAGE_CROPS'].fillna(0).astype(int)
+dfsingle['DAMAGE_PROPERTY'] = dfsingle['DAMAGE_PROPERTY'].fillna(0).astype(int)
+dfsingle['ALL_INJURIES'] = dfsingle['ALL_INJURIES'].fillna(0)
+dfsingle['ALL_DEATHS'] = dfsingle['ALL_DEATHS'].fillna(0)
+dfsingle['ALL_DAMAGE'] = dfsingle['ALL_DAMAGE'].fillna(0)
+
+dfsingle.loc[dfsingle['DEATHS_DIRECT']<0, 'DEATHS_DIRECT'] = 0
+dfsingle.loc[dfsingle['DEATHS_INDIRECT']<0, 'DEATHS_INDIRECT'] = 0
+dfsingle.loc[dfsingle['INJURIES_DIRECT']<0, 'INJURIES_DIRECT'] = 0
+dfsingle.loc[dfsingle['INJURIES_DIRECT']<0, 'INJURIES_DIRECT'] = 0
+dfsingle.loc[dfsingle['DAMAGE_PROPERTY']<0, 'DAMAGE_PROPERTY'] = 0
+dfsingle.loc[dfsingle['DAMAGE_CROPS']<0, 'DAMAGE_CROPS'] = 0
+dfsingle.loc[dfsingle['ALL_INJURIES']<0, 'ALL_INJURY'] = 0
+dfsingle.loc[dfsingle['ALL_DEATHS']<0, 'ALL_DEATH'] = 0
+dfsingle.loc[dfsingle['ALL_DAMAGE']<0, 'ALL_DAMAGE'] = 0
+
 dfsingle = dfsingle.drop_duplicates()
 
 # dfsingle['start_year'] = dfsingle['BEGIN_DATETIME'].dt.year
@@ -88,6 +110,9 @@ dfsingle = dfsingle.reindex(
         "DEATHS_INDIRECT",
         "DAMAGE_PROPERTY",
         "DAMAGE_CROPS",
+        'ALL_INJURIES',
+        'ALL_DEATHS',
+        'ALL_DAMAGE',
         "SOURCE",
         "MAGNITUDE",
         "MAGNITUDE_TYPE",
@@ -153,6 +178,7 @@ c = 50  # in thoughsands
 p = 50  # in thoughsands
 
 # filter by event impact
+# modify below to filter by 'ALL_INJURIES','ALL_DEATHS','ALL_DAMAGE' if desired
 dfsingle = dfsingle[
     (
         (dfsingle["INJURIES_DIRECT"] >= inj)
