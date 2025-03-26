@@ -286,11 +286,30 @@ def to_cost(column):
     scale = np.select([has_K, has_M, has_B], [1000, 1_000_000, 1_000_000_000], 1)
     return scale * price
 
+#standardize damage values
+df_details.DAMAGE_PROPERTY = to_cost( df_details.DAMAGE_PROPERTY)
+df_details.DAMAGE_CROPS = to_cost( df_details.DAMAGE_CROPS)
 
-df_details.DAMAGE_PROPERTY = to_cost(df_details.DAMAGE_PROPERTY)
-df_details.DAMAGE_CROPS = to_cost(df_details.DAMAGE_CROPS)
-df_details["DAMAGE_CROPS"] = df_details["DAMAGE_CROPS"].fillna(0).astype(int)
-df_details["DAMAGE_PROPERTY"] = df_details["DAMAGE_PROPERTY"].fillna(0).astype(int)
+
+#fix invalid values
+df_details['DEATHS_DIRECT'] = df_details['DEATHS_DIRECT'].fillna(0).astype(int)
+df_details['DEATHS_INDIRECT'] = df_details['DEATHS_INDIRECT'].fillna(0).astype(int)
+df_details['INJURIES_DIRECT'] = df_details['INJURIES_DIRECT'].fillna(0).astype(int)
+df_details['INJURIES_DIRECT'] = df_details['INJURIES_DIRECT'].fillna(0).astype(int)
+df_details['DAMAGE_CROPS'] = df_details['DAMAGE_CROPS'].fillna(0).astype(int)
+df_details['DAMAGE_PROPERTY'] = df_details['DAMAGE_PROPERTY'].fillna(0).astype(int)
+df_details.loc[df_details['DEATHS_DIRECT']<0, 'DEATHS_DIRECT'] = 0
+df_details.loc[df_details['DEATHS_INDIRECT']<0, 'DEATHS_INDIRECT'] = 0
+df_details.loc[df_details['INJURIES_DIRECT']<0, 'INJURIES_DIRECT'] = 0
+df_details.loc[df_details['INJURIES_DIRECT']<0, 'INJURIES_DIRECT'] = 0
+df_details.loc[df_details['DAMAGE_PROPERTY']<0, 'DAMAGE_PROPERTY'] = 0
+df_details.loc[df_details['DAMAGE_CROPS']<0, 'DAMAGE_CROPS'] = 0
+
+#add new combined impact fields
+dfsingle['ALL_DAMAGE'] = (dfsingle['DAMAGE_PROPERTY'] + dfsingle['DAMAGE_CROPS']).fillna(0)
+dfsingle['ALL_DEATH'] = (dfsingle['DEATHS_DIRECT'] + dfsingle['DEATHS_INDIRECT']).fillna(0)
+dfsingle['ALL_INJURY'] = (dfsingle['INJURIES_DIRECT'] + dfsingle['INJURIES_INDIRECT']).fillna(0)
+
 
 # identify events with known location data
 with_coordinates = df_details.BEGIN_LAT.notnull() & df_details.BEGIN_LON.notnull()
@@ -355,6 +374,9 @@ df_details = df_details.reindex(
         "DEATHS_INDIRECT",
         "DAMAGE_PROPERTY",
         "DAMAGE_CROPS",
+        "ALL_INJURIES",
+        "ALL_DEATHS",
+        "ALL_DAMAGE",
         "SOURCE",
         "MAGNITUDE",
         "MAGNITUDE_TYPE",
