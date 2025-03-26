@@ -307,8 +307,8 @@ df_details.loc[df_details['DAMAGE_CROPS']<0, 'DAMAGE_CROPS'] = 0
 
 #add new combined impact fields
 dfsingle['ALL_DAMAGE'] = (dfsingle['DAMAGE_PROPERTY'] + dfsingle['DAMAGE_CROPS']).fillna(0)
-dfsingle['ALL_DEATH'] = (dfsingle['DEATHS_DIRECT'] + dfsingle['DEATHS_INDIRECT']).fillna(0)
-dfsingle['ALL_INJURY'] = (dfsingle['INJURIES_DIRECT'] + dfsingle['INJURIES_INDIRECT']).fillna(0)
+dfsingle['ALL_DEATHS'] = (dfsingle['DEATHS_DIRECT'] + dfsingle['DEATHS_INDIRECT']).fillna(0)
+dfsingle['ALL_INJURIES'] = (dfsingle['INJURIES_DIRECT'] + dfsingle['INJURIES_INDIRECT']).fillna(0)
 
 
 # identify events with known location data
