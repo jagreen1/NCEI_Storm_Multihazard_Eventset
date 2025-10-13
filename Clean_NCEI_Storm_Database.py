@@ -34,7 +34,7 @@ Output_Cleaned_Database_Path = r"PATH GOES HERE"
 base_dir = r"{NCEI_Storm_Database_Bulk_FTP_Download_Path}"
 
 NWS_Z_to_CZ_Fips_df = pd.read_csv(
-    r"https://github.com/jagreen1/NCEI_Storm_Multihazard_Eventset/blob/main/NWS_Zone_to_Cunty_FIPS_bp18mr25.dbx.txt",
+    r"https://github.com/jagreen1/NCEI_Storm_Multihazard_Eventset/blob/main/NWS_Zone_to_County_FIPS_bp18mr25.dbx.txt",
     delimiter="|",
 )
 
