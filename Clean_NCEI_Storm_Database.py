@@ -217,17 +217,17 @@ df_details["HAZARD"] = df_details["EVENT_TYPE"].map(acronym_map)
 # cfl - 'Coastal Flood' & 'Lakeshore Flood'
 
 
-# standardize timezones
-
+# Standardize timezones
+# There are several one off events with inconsistent time zones
 timezone_substitutions = {
     "CDT": "CST",
-    "CSC": "CST",  # event was in Iowa
+    "CSC": "CST",  
     "EDT": "EST",
-    "GMT": "CST",  # event was in Louisiana
-    "GST": "ChST",  # events were in Guam, which uses Chamorro Standard Time
+    "GMT": "CST",  
+    "GST": "ChST",  
     "MDT": "MST",
     "PDT": "PST",
-    "SCT": "CST",  # event was in Wisconsin
+    "SCT": "CST",  
 }
 unknown_timezones = {
     "HAWAII": "HST",
@@ -272,7 +272,7 @@ df_details = df_details.drop(columns=legacy)
 df_details["start_year"] = df_details["BEGIN_DATETIME"].dt.year
 df_details["end_year"] = df_details["END_DATETIME"].dt.year
 
-# standardize costs
+# Standardize damage values
 def to_cost(column):
     price = column[column.notnull()].astype("str").str.upper()
 
@@ -286,12 +286,11 @@ def to_cost(column):
     scale = np.select([has_K, has_M, has_B], [1000, 1_000_000, 1_000_000_000], 1)
     return scale * price
 
-#standardize damage values
 df_details.DAMAGE_PROPERTY = to_cost( df_details.DAMAGE_PROPERTY)
 df_details.DAMAGE_CROPS = to_cost( df_details.DAMAGE_CROPS)
 
 
-#fix invalid values
+# Fix invalid values
 df_details['DEATHS_DIRECT'] = df_details['DEATHS_DIRECT'].fillna(0).astype(int)
 df_details['DEATHS_INDIRECT'] = df_details['DEATHS_INDIRECT'].fillna(0).astype(int)
 df_details['INJURIES_DIRECT'] = df_details['INJURIES_DIRECT'].fillna(0).astype(int)
@@ -305,13 +304,13 @@ df_details.loc[df_details['INJURIES_DIRECT']<0, 'INJURIES_DIRECT'] = 0
 df_details.loc[df_details['DAMAGE_PROPERTY']<0, 'DAMAGE_PROPERTY'] = 0
 df_details.loc[df_details['DAMAGE_CROPS']<0, 'DAMAGE_CROPS'] = 0
 
-#add new combined impact fields
+# Add new combined impact fields
 dfsingle['ALL_DAMAGE'] = (dfsingle['DAMAGE_PROPERTY'] + dfsingle['DAMAGE_CROPS']).fillna(0)
 dfsingle['ALL_DEATHS'] = (dfsingle['DEATHS_DIRECT'] + dfsingle['DEATHS_INDIRECT']).fillna(0)
 dfsingle['ALL_INJURIES'] = (dfsingle['INJURIES_DIRECT'] + dfsingle['INJURIES_INDIRECT']).fillna(0)
 
 
-# identify events with known location data
+# Identify events with known location data
 with_coordinates = df_details.BEGIN_LAT.notnull() & df_details.BEGIN_LON.notnull()
 with_cz_name = df_details.CZ_NAME.notnull()
 with_cz_fips = df_details.CZ_FIPS.notnull()
@@ -406,7 +405,7 @@ df_details = df_details.reindex(
 )
 
 
-# save full dataset, as csv and parquet
+# Save full dataset, as csv and parquet
 df_details = df_details.sort_values(
     ["BEGIN_DATETIME", "CZ_FIPS"], ascending=[True, True]
 )
@@ -422,7 +421,7 @@ df_details.to_parquet(
     compression="gzip",
 )
 
-# save version with just 1996 to 2024 data, as csv and parquet
+# Save version with just 1996 to 2024 data, as csv and parquet
 df_details_1996_2024 = df_details[
     df_details["BEGIN_DATETIME"]
     >= datetime.strptime("1996-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
