@@ -54,7 +54,7 @@ dfsingle = dfsingle[~dfsingle["CZ_FIPS"].isnull()]
 dfsingle = dfsingle[~dfsingle["BEGIN_DATETIME"].isnull()]
 dfsingle = dfsingle[~dfsingle["END_DATETIME"].isnull()]
 
-# remove these columns if desired
+# Remove these columns if desired
 # dfsingle = dfsingle.drop(columns=['EPISODE_NARRATIVE', 'EVENT_NARRATIVE'])
 
 dfsingle["DAMAGE_CROPS"] = dfsingle["DAMAGE_CROPS"].fillna(0).astype(int)
@@ -147,7 +147,7 @@ dfsingle = dfsingle[
     & (dfsingle["END_DATETIME"].dt.year <= end_year)
 ]
 
-# remove unwanted state classes
+# Remove unwanted state classes
 # CHANGE THE EXCLUSED STATES AS DESIRED
 # NOTE THAT THIS CLASSIFICATION INCLUDES US TERRITORIES AND WATER BODIES
 Exclusion_State_List = [
@@ -170,12 +170,12 @@ Exclusion_State_List = [
 ]
 dfsingle = dfsingle[~dfsingle["STATE"].isin(Exclusion_State_List)]
 
-# impact filter thresholds
+# Impact filter thresholds
 # CHANGE THESE VALUES AS DESIRED FOR APPROPRIATE IMPACT FILTERING
 inj = 1
 dth = 1
-c = 50  # in thoughsands
-p = 50  # in thoughsands
+c = 50  # in thousands
+p = 50  # in thousands
 
 # filter by event impact
 # modify below to filter by 'ALL_INJURIES','ALL_DEATHS','ALL_DAMAGE' if desired
@@ -216,7 +216,7 @@ state_fips_list.sort()
 No_Multihazard_County_df = pd.DataFrame()
 
 
-# Function to check if datetime ranges overlap with a time lag
+# Check if datetime ranges overlap with a time lag
 def datetime_ranges_overlap_with_lag(start1, end1, start2, end2, lag):
     return max(start1 - lag, start2 - lag) <= min(end1 + lag, end2 + lag)
 
