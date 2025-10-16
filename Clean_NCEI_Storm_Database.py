@@ -4,7 +4,7 @@ Created March 21st, 2025
 
 @author: Joshua Green - University of Southampton
 
-Please cite this dataset if used in any publications.
+Please cite this script/dataset if used in any publications.
 
 Green, J. (2025) NCEI Storm Multihazard Eventset.
 """
