@@ -27,16 +27,20 @@ The input database files necessary to run these scripts can be downloaded via HT
 - https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/
 - ftp://ftp.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/
 """
-NCEI_Storm_Database_Bulk_FTP_Download_Path = r"PATH GOES HERE"
-Output_Cleaned_Database_Path = r"PATH GOES HERE"
+NCEI_Storm_Database_Bulk_FTP_Download_Path = r"PATH GOES HERE" #DEFINE THE PATH TO THE STORM DATABASE FILES
+Output_Cleaned_Database_Path = r"PATH GOES HERE" #DEFINE THE PATH FOR SAVING THE CLEANED DATABASE OUTPUT FILES
 
 
-base_dir = r"{NCEI_Storm_Database_Bulk_FTP_Download_Path}"
+base_dir = r'{NCEI_Storm_Database_Bulk_FTP_Download_Path}'
 
-NWS_Z_to_CZ_Fips_df = pd.read_csv(
-    r"https://github.com/jagreen1/NCEI_Storm_Multihazard_Eventset/blob/main/NWS_Zone_to_County_FIPS_bp18mr25.dbx.txt",
-    delimiter="|",
-)
+# Load US county fips code table data for standardization
+NWS_Z_to_CZ_Fips_df = pd.read_csv(r'https://github.com/jagreen1/NCEI_Storm_Multihazard_Eventset/blob/main/NWS_Zone_to_County_FIPS_bp18mr25.dbx.txt', delimiter='|')
+
+# Load US CPI data table to complete inflation damage transformation
+US_BLS_CPI_2000_2025_df = pd.read_excel(r'https://github.com/jagreen1/NCEI_Storm_Multihazard_Eventset/blob/main/US_BLS_CPI_Inflation_1950-2024.xlsx', skiprows=11)
+
+inflation_target_year = 2024 #CHANGE THE INFLATION YEAR AS DESIRED
+
 
 
 def load_files(pattern):
@@ -63,7 +67,7 @@ df_details = df_details[~df_details["CZ_FIPS"].isnull()]
 df_details = df_details.drop_duplicates()
 
 
-# convert the NWS zones in CZ_FIPS (for CZ_TYPE = Z) to actual CZ FIPS values
+# convert the NWS zones in CZ_FIPS (for CZ_TYPE = Z) to CZ FIPS values
 
 # Filter the rows where CZ_TYPE equals 'C'
 cz_type_c = df_details[df_details["CZ_TYPE"] == "C"]
@@ -81,18 +85,17 @@ def replace_cz_fips(row):
     return row["CZ_FIPS"]
 
 
-# Apply the function to update the CZ_FIPS column
+# Update the CZ_FIPS column
 df_details["CZ_FIPS"] = df_details.apply(replace_cz_fips, axis=1)
 
 
 df_details["CZ_FIPS"] = df_details["CZ_FIPS"].astype(str).str.zfill(3)
 df_details["STATE_FIPS"] = df_details["STATE_FIPS"].astype(str).str.zfill(2)
-df_details["GEOID"] = df_details["STATE_FIPS"].astype(str).str.zfill(2) + df_details[
-    "CZ_FIPS"
-].astype(str).str.zfill(3)
+df_details["GEOID"] = df_details["STATE_FIPS"].astype(str).str.zfill(2) + df_details["CZ_FIPS"].astype(str).str.zfill(3)
 
 df_details.SOURCE = df_details.SOURCE.str.title()
 
+# Define and standardize the names of event reporting sources
 ACRONYMS = ["Asos", "Awos", "Awss", "Nws", "C-Man", "Raws", "Shave", "Snotel", "Wlon"]
 for acronym in ACRONYMS:
     pattern = f"\\b{acronym}\\b"
@@ -120,13 +123,12 @@ for original, replacement in source_substitutions.items():
     df_details.SOURCE = df_details.SOURCE.str.replace(original, replacement)
 
 
-# standardize hazard event names
-
+# Standardize hazard event names
 event_substitution = {
     r"^HAIL.*": "Hail",
     r"^High Snow$": "Heavy Snow",
     r"^Hurricane$": "Hurricane",
-    r"^OTHER$": "Dust Devil",
+    r"^OTHER$": "Dust Devil", #There is one instance of a dust devil event being defined as "OTHER"
     r"^THUNDERSTORM WIND.*": "Thunderstorm Wind",
     r"^TORNADO.*": "Tornado",
     r"^Volcanic Ashfall.*$": "Volcanic Ash",
@@ -145,7 +147,7 @@ df_details["EVENT_TYPE"] = df_details["EVENT_TYPE"].str.replace(
     "Hurricane (Typhoon)", "Hurricane/Typhoon", regex=False
 )
 
-# map HAZARD col using acronym dict
+# Map for renaming hazards using an acronym dict
 acronym_map = {
     "Heavy Snow": "sn",
     "High Wind": "ew",
@@ -205,6 +207,7 @@ acronym_map = {
     "Marine Lightning": "mltn",
     "Marine Tropical Depression": "mtc",
 }
+# Standardize and abbreviate the hazard event types
 df_details["HAZARD"] = df_details["EVENT_TYPE"].map(acronym_map)
 
 # NOTE: There are several similar hazards that I have chosen to group together, see below:
@@ -290,7 +293,8 @@ df_details.DAMAGE_PROPERTY = to_cost( df_details.DAMAGE_PROPERTY)
 df_details.DAMAGE_CROPS = to_cost( df_details.DAMAGE_CROPS)
 
 
-# Fix invalid values
+ 
+# Fix invalid values (negative/nan) by reassigning to zero
 df_details['DEATHS_DIRECT'] = df_details['DEATHS_DIRECT'].fillna(0).astype(int)
 df_details['DEATHS_INDIRECT'] = df_details['DEATHS_INDIRECT'].fillna(0).astype(int)
 df_details['INJURIES_DIRECT'] = df_details['INJURIES_DIRECT'].fillna(0).astype(int)
@@ -304,10 +308,21 @@ df_details.loc[df_details['INJURIES_DIRECT']<0, 'INJURIES_DIRECT'] = 0
 df_details.loc[df_details['DAMAGE_PROPERTY']<0, 'DAMAGE_PROPERTY'] = 0
 df_details.loc[df_details['DAMAGE_CROPS']<0, 'DAMAGE_CROPS'] = 0
 
+# Adjust damage cost amounts for inflation, based on US BLS CPI
+# Assumes events occur over the same start year, disregarding events that span over two years, calculated annually not monthly
+df_details['INFLATION_YEAR'] = df_details['start_year']
+
+cpi_annual_data_2000_2025 = US_BLS_CPI_2000_2025_df.set_index('Year')['Annual'].to_dict()
+inflation_cpi_target = cpi_annual_data_2000_2025[inflation_target_year]
+
+# Complete inflation transformation to correct damage metrics
+df_details['ADJ_DAMAGE_PROPERTY'] = df_details.apply(lambda row: round(row['DAMAGE_PROPERTY'] * (inflation_cpi_target / cpi_annual_data_2000_2025[row['INFLATION_YEAR']])),axis=1)
+df_details['ADJ_DAMAGE_CROPS'] = df_details.apply(lambda row: round(row['DAMAGE_CROPS'] * (inflation_cpi_target / cpi_annual_data_2000_2025[row['INFLATION_YEAR']])),axis=1)
+
 # Add new combined impact fields
-dfsingle['ALL_DAMAGE'] = (dfsingle['DAMAGE_PROPERTY'] + dfsingle['DAMAGE_CROPS']).fillna(0)
-dfsingle['ALL_DEATHS'] = (dfsingle['DEATHS_DIRECT'] + dfsingle['DEATHS_INDIRECT']).fillna(0)
-dfsingle['ALL_INJURIES'] = (dfsingle['INJURIES_DIRECT'] + dfsingle['INJURIES_INDIRECT']).fillna(0)
+df_details['TOTAL_ADJ_DAMAGE'] = (df_details['ADJ_DAMAGE_PROPERTY'] + df_details['ADJ_DAMAGE_CROPS']).fillna(0)
+df_details['TOTAL_DEATHS'] = (df_details['DEATHS_DIRECT'] + df_details['DEATHS_INDIRECT']).fillna(0)
+df_details['TOTAL_INJURIES'] = (df_details['INJURIES_DIRECT'] + df_details['INJURIES_INDIRECT']).fillna(0)
 
 
 # Identify events with known location data
@@ -373,9 +388,11 @@ df_details = df_details.reindex(
         "DEATHS_INDIRECT",
         "DAMAGE_PROPERTY",
         "DAMAGE_CROPS",
-        "ALL_INJURIES",
-        "ALL_DEATHS",
-        "ALL_DAMAGE",
+        "ADJ_DAMAGE_PROPERTY",
+        "ADJ_DAMAGE_CROPS",
+        "TOTAL_INJURIES",
+        "TOTAL_DEATHS",
+        "TOTAL_ADJ_DAMAGE",
         "SOURCE",
         "MAGNITUDE",
         "MAGNITUDE_TYPE",
