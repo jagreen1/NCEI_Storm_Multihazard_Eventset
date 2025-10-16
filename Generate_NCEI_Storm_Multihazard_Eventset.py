@@ -4,7 +4,7 @@ Created March 21st, 2025
 
 @author: Joshua Green - University of Southampton
 
-Please cite this dataset if used in any publications.
+Please cite this script/dataset if used in any publications.
 
 Green, J. (2025) NCEI Storm Multihazard Eventset.
 """
@@ -58,29 +58,30 @@ dfsingle = dfsingle[~dfsingle["END_DATETIME"].isnull()]
 # Remove these columns if desired
 # dfsingle = dfsingle.drop(columns=['EPISODE_NARRATIVE', 'EVENT_NARRATIVE'])
 
-dfsingle["DAMAGE_CROPS"] = dfsingle["DAMAGE_CROPS"].fillna(0).astype(int)
-dfsingle["DAMAGE_PROPERTY"] = dfsingle["DAMAGE_PROPERTY"].fillna(0).astype(int)
-
 
 dfsingle['DEATHS_DIRECT'] = dfsingle['DEATHS_DIRECT'].fillna(0).astype(int)
 dfsingle['DEATHS_INDIRECT'] = dfsingle['DEATHS_INDIRECT'].fillna(0).astype(int)
 dfsingle['INJURIES_DIRECT'] = dfsingle['INJURIES_DIRECT'].fillna(0).astype(int)
 dfsingle['INJURIES_DIRECT'] = dfsingle['INJURIES_DIRECT'].fillna(0).astype(int)
-dfsingle['DAMAGE_CROPS'] = dfsingle['DAMAGE_CROPS'].fillna(0).astype(int)
-dfsingle['DAMAGE_PROPERTY'] = dfsingle['DAMAGE_PROPERTY'].fillna(0).astype(int)
-dfsingle['ALL_INJURIES'] = dfsingle['ALL_INJURIES'].fillna(0)
-dfsingle['ALL_DEATHS'] = dfsingle['ALL_DEATHS'].fillna(0)
-dfsingle['ALL_DAMAGE'] = dfsingle['ALL_DAMAGE'].fillna(0)
+dfsingle["DAMAGE_CROPS"] = dfsingle["DAMAGE_CROPS"].fillna(0).astype(int)
+dfsingle["DAMAGE_PROPERTY"] = dfsingle["DAMAGE_PROPERTY"].fillna(0).astype(int)
+dfsingle['ADJ_DAMAGE_CROPS'] = dfsingle['ADJ_DAMAGE_CROPS'].fillna(0).astype(int)
+dfsingle['ADJ_DAMAGE_PROPERTY'] = dfsingle['ADJ_DAMAGE_PROPERTY'].fillna(0).astype(int)
+dfsingle['TOTAL_INJURIES'] = dfsingle['TOTAL_INJURIES'].fillna(0)
+dfsingle['TOTAL_DEATHS'] = dfsingle['TOTAL_DEATHS'].fillna(0)
+dfsingle['TOTAL_ADJ_DAMAGE'] = dfsingle['TOTAL_ADJ_DAMAGE'].fillna(0)
 
 dfsingle.loc[dfsingle['DEATHS_DIRECT']<0, 'DEATHS_DIRECT'] = 0
 dfsingle.loc[dfsingle['DEATHS_INDIRECT']<0, 'DEATHS_INDIRECT'] = 0
 dfsingle.loc[dfsingle['INJURIES_DIRECT']<0, 'INJURIES_DIRECT'] = 0
 dfsingle.loc[dfsingle['INJURIES_DIRECT']<0, 'INJURIES_DIRECT'] = 0
-dfsingle.loc[dfsingle['DAMAGE_PROPERTY']<0, 'DAMAGE_PROPERTY'] = 0
 dfsingle.loc[dfsingle['DAMAGE_CROPS']<0, 'DAMAGE_CROPS'] = 0
-dfsingle.loc[dfsingle['ALL_INJURIES']<0, 'ALL_INJURY'] = 0
-dfsingle.loc[dfsingle['ALL_DEATHS']<0, 'ALL_DEATH'] = 0
-dfsingle.loc[dfsingle['ALL_DAMAGE']<0, 'ALL_DAMAGE'] = 0
+dfsingle.loc[dfsingle['DAMAGE_PROPERTY']<0, 'DAMAGE_PROPERTY'] = 0
+dfsingle.loc[dfsingle['ADJ_DAMAGE_CROPS']<0, 'ADJ_DAMAGE_CROPS'] = 0
+dfsingle.loc[dfsingle['ADJ_DAMAGE_PROPERTY']<0, 'ADJ_DAMAGE_PROPERTY'] = 0
+dfsingle.loc[dfsingle['TOTAL_INJURIES']<0, 'TOTAL_INJURIES'] = 0
+dfsingle.loc[dfsingle['TOTAL_DEATHS']<0, 'TOTAL_DEATHS'] = 0
+dfsingle.loc[dfsingle['TOTAL_ADJ_DAMAGE']<0, 'TOTAL_ADJ_DAMAGE'] = 0
 
 dfsingle = dfsingle.drop_duplicates()
 
@@ -111,9 +112,11 @@ dfsingle = dfsingle.reindex(
         "DEATHS_INDIRECT",
         "DAMAGE_PROPERTY",
         "DAMAGE_CROPS",
-        'ALL_INJURIES',
-        'ALL_DEATHS',
-        'ALL_DAMAGE',
+        "ADJ_DAMAGE_PROPERTY",
+        "ADJ_DAMAGE_CROPS",
+        'TOTAL_INJURIES',
+        'TOTAL_DEATHS',
+        'TOTAL_ADJ_DAMAGE',
         "SOURCE",
         "MAGNITUDE",
         "MAGNITUDE_TYPE",
@@ -171,23 +174,23 @@ Exclusion_State_List = [
 ]
 dfsingle = dfsingle[~dfsingle["STATE"].isin(Exclusion_State_List)]
 
-# Impact filter thresholds
+# Impact filter thresholds, minimum values for including in final event set
 # CHANGE THESE VALUES AS DESIRED FOR APPROPRIATE IMPACT FILTERING
-inj = 1
-dth = 1
-c = 50  # in thousands
-p = 50  # in thousands
+inj = 1 # injuries
+dth = 1 # deaths
+c = 50  # crop damage in thousands
+p = 50  # property damage in thousands
 
-# filter by event impact
-# modify below to filter by 'ALL_INJURIES','ALL_DEATHS','ALL_DAMAGE' if desired
+# Filter by event impact
+# Modify below to filter by 'ALL_INJURIES','ALL_DEATHS','TOTAL_ADJ_DAMAGE' if desired
 dfsingle = dfsingle[
     (
         (dfsingle["INJURIES_DIRECT"] >= inj)
         | (dfsingle["INJURIES_INDIRECT"] >= inj)
         | (dfsingle["DEATHS_DIRECT"] >= dth)
         | (dfsingle["DEATHS_INDIRECT"] >= dth)
-        | (dfsingle["DAMAGE_CROPS"] >= c * 1000)
-        | (dfsingle["DAMAGE_PROPERTY"] >= p * 1000)
+        | (dfsingle["ADJ_DAMAGE_CROPS"] >= c * 1000)
+        | (dfsingle["ADJ_DAMAGE_PROPERTY"] >= p * 1000)
     )
 ]
 
@@ -350,7 +353,7 @@ for state_fips in tqdm(state_fips_list):
 
         all_pair_df = pd.DataFrame()
 
-        # check to make sure there are some overlapping events, if not then skip to the next county iteration
+        # Check to make sure there are some overlapping events, if not then skip to the next county iteration
         if len(overlapping_event_pairs_unique) > 0:
 
             for i in range(0, len(overlapping_event_pairs_unique)):
@@ -386,7 +389,7 @@ for state_fips in tqdm(state_fips_list):
                 temp_df = pd.concat([pair_df_1, pair_df_2])
                 temp_df = temp_df.sort_values(
                     by="EVENT_TYPE"
-                )  # reorder the two event pairs such that the event_type pairs are later formatted the same, when combined into a single string
+                )  # Reorder the two event pairs such that the event_type pairs are later formatted the same, when combined into a single string
                 all_pair_df = pd.concat([all_pair_df, temp_df])
 
             all_pair_df = all_pair_df[
@@ -407,18 +410,18 @@ for state_fips in tqdm(state_fips_list):
                 "DEATHS_INDIRECT"
             ].transform("sum")
             MULTI_DAMAGE_PROPERTY = all_pair_df.groupby("PAIR_ID")[
-                "DAMAGE_PROPERTY"
+                "ADJ_DAMAGE_PROPERTY"
             ].transform("sum")
             MULTI_DAMAGE_CROPS = all_pair_df.groupby("PAIR_ID")[
-                "DAMAGE_CROPS"
+                "ADJ_DAMAGE_CROPS"
             ].transform("sum")
 
             all_pair_df["MULTI_INJURIES_DIRECT"] = MULTI_INJURIES_DIRECT
             all_pair_df["MULTI_INJURIES_INDIRECT"] = MULTI_INJURIES_INDIRECT
             all_pair_df["MULTI_DEATHS_DIRECT"] = MULTI_DEATHS_DIRECT
             all_pair_df["MULTI_DEATHS_INDIRECT"] = MULTI_DEATHS_INDIRECT
-            all_pair_df["MULTI_DAMAGE_PROPERTY"] = MULTI_DAMAGE_PROPERTY
-            all_pair_df["MULTI_DAMAGE_CROPS"] = MULTI_DAMAGE_CROPS
+            all_pair_df["MULTI_ADJ_DAMAGE_PROPERTY"] = MULTI_DAMAGE_PROPERTY
+            all_pair_df["MULTI_ADJ_DAMAGE_CROPS"] = MULTI_DAMAGE_CROPS
 
             all_pair_df = all_pair_df.reindex(
                 columns=[
@@ -448,10 +451,10 @@ for state_fips in tqdm(state_fips_list):
                     "DEATHS_DIRECT",
                     "MULTI_DEATHS_INDIRECT",
                     "DEATHS_INDIRECT",
-                    "MULTI_DAMAGE_PROPERTY",
-                    "DAMAGE_PROPERTY",
-                    "MULTI_DAMAGE_CROPS",
-                    "DAMAGE_CROPS",
+                    "MULTI_ADJ_DAMAGE_PROPERTY",
+                    "ADJ_DAMAGE_PROPERTY",
+                    "MULTI_ADJ_DAMAGE_CROPS",
+                    "ADJ_DAMAGE_CROPS",
                     "SOURCE",
                     "MAGNITUDE",
                     "MAGNITUDE_TYPE",
