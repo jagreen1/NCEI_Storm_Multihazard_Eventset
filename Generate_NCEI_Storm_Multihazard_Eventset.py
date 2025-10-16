@@ -30,7 +30,8 @@ end_year = 2024
 
 # Define time lag in days
 # CHANGE THESE VALUES AS DESIRED FOR APPROPRIATE TEMPORAL OVERLAP
-time_lag = pd.Timedelta(days=90)
+time_lag_days = 90
+time_lag = pd.Timedelta(days=time_lag_days)
 time_lag_int = time_lag.days
 
 
