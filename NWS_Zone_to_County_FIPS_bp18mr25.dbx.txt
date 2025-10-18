@@ -1,3 +1,4 @@
+STATE|ZONE|CWA|NAME|STATE_ZONE|COUNTY|FIPS|TIME_zone|FE_AREA|LAT|LON
 NM|201|ABQ|Northwest Plateau|NM201|McKinley|35031|M|nw|36.4270|-108.4064
 NM|201|ABQ|Northwest Plateau|NM201|San Juan|35045|M|nw|36.4270|-108.4064
 NM|202|ABQ|Chuska Mountains|NM202|McKinley|35031|M|nw|36.0409|-108.9296
@@ -4834,3 +4835,4 @@ FL|333|JAX|Southeast Coastal St. Johns|FL333|St. Johns|12109|E|ne|29.7778|-81.29
 FL|433|JAX|Northern Inland St. Johns|FL433|St. Johns|12109|E|ne|30.0120|-81.4554
 FL|533|JAX|Southern Inland St. Johns|FL533|St. Johns|12109|E|ne|29.7856|-81.4103
 FL|633|JAX|Western St. Johns|FL633|St. Johns|12109|E|ne|29.9173|-81.5564
+
