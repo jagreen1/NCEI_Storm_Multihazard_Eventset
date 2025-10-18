@@ -174,6 +174,10 @@ Exclusion_State_List = [
 ]
 dfsingle = dfsingle[~dfsingle["STATE"].isin(Exclusion_State_List)]
 
+
+#remove marine zone only events, this should have been done as a byproduct of the above step, however this check is implemented as a backup
+dfsingle = dfsingle[(dfsingle['CZ_TYPE']!='M')]
+
 # Impact filter thresholds, minimum values for including in final event set
 # CHANGE THESE VALUES AS DESIRED FOR APPROPRIATE IMPACT FILTERING
 inj = 1 # injuries
