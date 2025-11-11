@@ -24,9 +24,10 @@ import pickle
 ######################################################################################################
 #                        USER DEFINED PARAMETERS
 ######################################################################################################
-Cleaned_NCEI_Storm_Database_Parquet_Path = r"C:\Users\Administrator\OneDrive\OneDrive - University of Southampton\Data\Hazards_Disasters\NCEI_Storm_Database_Cleaned\NCEI_Storm_Database_Cleaned_Details_1996-2024.parquet"
-Hazard_Eventset_Output_Path = r"C:\Users\Administrator\OneDrive\OneDrive - University of Southampton\Data\Hazards_Disasters\Updated_NCEI_Eventsets"
-US_County_Shapefile_Path = r'C:\Users\Administrator\OneDrive\OneDrive - University of Southampton\Data\Admin_Bounds\CONUS_cb_2018_us_county_500k\CONUS_cb_2018_us_county_500k_WGS84.shp'
+Cleaned_NCEI_Storm_Database_Parquet_Path = 'PATH TO CLEANED DATABASE PARQUET FILE'
+Hazard_Eventset_Output_Path = 'PATH FOR OUTPUT FILES'
+US_County_Shapefile_Path = 'PATH TO US CENSUS BUREAU COUNTY SHAPEFILE'
+US_County_Shapefile_Path = 'https://github.com/jagreen1/NCEI_Storm_Multihazard_Eventset/raw/refs/heads/main/cb_2018_us_county_500k.shp'
 
 # Define temporal year range
 # CHANGE THESE VALUES AS DESIRED FOR TEMPORAL COVERAGE
