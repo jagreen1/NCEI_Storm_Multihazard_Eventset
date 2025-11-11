@@ -55,7 +55,8 @@ c = 10  # crop damage in thousands
 p = 10  # property damage in thousands
 
 ######################################################################################################
-
+#                        MAIN SCRIPT
+######################################################################################################
 Hazard_Dict_Output_Path = rf'{Hazard_Eventset_Output_Path}\\Eventset_Dicts_{inj}inj_{dth}dth_{c}c_{p}p_lag{time_lag_days}_{start_year}-{end_year}'
 
 
